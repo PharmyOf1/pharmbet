@@ -41,7 +41,7 @@ teams = {
 		
 		}
 
-team = 'den'
+team = 'nwe'
 
 ########
 
@@ -52,7 +52,7 @@ def get_all_info(team):
     all_data = []
     
     url = 'http://www.pro-football-reference.com/teams'
-    for year in range(1950,1980):
+    for year in range(2012,2013):
         try:
             next_url = '/'.join([url,team,str(year)]) + '.htm'
             soup = BeautifulSoup(requests.get(next_url).text,"html.parser")
@@ -60,8 +60,10 @@ def get_all_info(team):
     
 
             sched_table = soup.find("table",id="team_gamelogs").findAll('tr')[2:]
+            coach_table = soup.find('div', {'id' : 'info_box'}).findAll('a', href=True)
+            
 
-            team_data = (get_results(sched_table,year,team))
+            team_data = (get_results(sched_table,year,team,coach_table))
             
             #This is just for debug right now, the right thing would be to send the team_data list above to function
             #that inserts into DB. This will save on memory as it overides. Should loop 32 times to get all data in
@@ -74,7 +76,7 @@ def get_all_info(team):
     
 
 
-def get_results(sched_table,year,team):
+def get_results(sched_table,year,team,coach_table):
 
     season_data = []
 
@@ -110,26 +112,41 @@ def get_results(sched_table,year,team):
     	    
     	    #Opponent
     	    year_data.append(col[8].string)
+
+    	    #Yards Gained
+    	    year_data.append(col[12].string)
+
+    	    #Yards Against
+    	    year_data.append(col[17].string)
+
     	    
-    	    
+    	    #Adds coach to every game for the year
+    	    year_data.append(get_coach(coach_table))
+
+    	    #Call QB
+
+
     	    season_data.append(year_data)
 
-    	    #Call coach
-    	    #Call QB
+    	    
+    	    
     
     return (season_data)
 
 
     	    
 
-def get_coach():
-	pass
+def get_coach(coach_table):
+	for row in coach_table:
+		if 'coaches' in (str(row['href'])):
+			return row.string
+			break
+	
 
 
 
 def get_qb():
 	pass
-
 
 
 
