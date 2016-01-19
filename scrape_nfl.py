@@ -100,10 +100,14 @@ def get_results(sched_table,year,team,coach_table):
     	    
     	    #Result
     	    year_data.append(col[4].string)
-    	   
-    	    #Current Record
-    	    year_data.append(col[6].string)
+
+    	    record = (col[6].string)
     	    
+    	    if record != None:
+    	    	print (((col[6].string).split('-'))[0])
+    	    	year_data.append(((col[6].string).split('-'))[0])
+    	    	year_data.append(((col[6].string).split('-'))[1])
+
     	    #Home or Away
     	    home_away = (col[7].string)
     	    if home_away is None:
@@ -123,8 +127,8 @@ def get_results(sched_table,year,team,coach_table):
     	    #Adds coach to every game for the year
     	    year_data.append(get_coach(coach_table))
 
-    	    #Call QB
 
+    	    #Call QB
 
     	    season_data.append(year_data)
 
