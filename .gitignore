@@ -1,0 +1,10 @@
+db.sqlite3
+__pycache__
+secrets.py
+base.py
+production.py
+development.py
+testing.py
+engine_info.py
+cr.py
+*.pyc

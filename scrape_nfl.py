@@ -1,4 +1,3 @@
-
 import requests
 from bs4 import BeautifulSoup
 
@@ -64,11 +63,14 @@ def get_all_info(team):
             
 
             team_data = (get_results(sched_table,year,team,coach_table))
+           
+            for game_week in team_data:
+                upload_to_nfl_history(game_week)
             
             #This is just for debug right now, the right thing would be to send the team_data list above to function
             #that inserts into DB. This will save on memory as it overides. Should loop 32 times to get all data in
-            all_data.append(team_data)
-            print (all_data)
+            
+            
         
         except:
         	print(('No season for {} in {}.').format(teams[team],year))
@@ -91,22 +93,28 @@ def get_results(sched_table,year,team,coach_table):
     	    year_data = []
     	    
     	    #For Database purposes
-    	    year_data.append(int(year))
+    	    year_data.append(year)
     	    
     	    #For Database purposes
     	    year_data.append(teams[team])
     	    
     	    #Week Num
-    	    year_data.append(int(col[0].string))
+    	    year_data.append(col[0].string)
     	    
     	    #Result
-    	    year_data.append(col[4].string)
+    	    result = (col[4].string)
+    	    if result != None:
+    	       year_data.append(result)
+    	    else:
+    	        year_data.append('Bye')
 
     	    record = (col[6].string)
     	    
     	    if record != None:
     	    	year_data.append(int(((col[6].string).split('-'))[0]))
     	    	year_data.append(int(((col[6].string).split('-'))[1]))
+    	    else:
+    	        year_data.append('Bye')
 
     	    #Home or Away
     	    home_away = (col[7].string)
@@ -118,18 +126,22 @@ def get_results(sched_table,year,team,coach_table):
     	    year_data.append(col[8].string)
 
     	    #Yards Gained
-    	    year_data.append(int(col[12].string))
+    	    year_data.append(col[12].string)
 
     	    #Yards Against
-    	    year_data.append(int(col[17].string))
+    	    year_data.append(col[17].string)
 
     	    
     	    #Adds coach to every game for the year
-    	    year_data.append(get_coach(coach_table))
+    	    try:
+    	       year_data.append(get_coach(coach_table))
+    	    except:
+    	        year_data.append('None')
 
-
+            
     	    #Call QB
 
+           
     	    season_data.append(year_data)
 
     	    
@@ -145,94 +157,9 @@ def get_coach(coach_table):
 		if 'coaches' in (str(row['href'])):
 			return row.string
 			break
-	
-
-
-
-def get_qb():
-	pass
-
-
-
-
-
-def insert_to_db():
-	pass
-
-
-
-from sqlalchemy import *
-from sqlalchemy.orm import *
-from sqlalchemy.ext.declarative import declarative_base
-
-
-
-#############################Create Session Connect
-
-
-
-#############################Create Session Connect
-
-  
-class nfl_history(Base):
-    __tablename__ = "nfl_history"
-    id = Column(Integer, primary_key=True)
-    year = Column(Integer(4))
-    team = Column(String(25))
-    week_num = Column(Integer(2))
-    result = Column(String(5))
-    wins = Column(Integer(2))
-    place = Column(String(10))
-    opponent = Column(String(30))
-    yards_for = Column(int(4))
-    yards_against = Column(int(4))
-    coach = Column(String(30))
-    
-    
-    def __init__(self,year,team,week_num,result,wins,place,opponent,yards_for,yards_against,coach):
-        self.year = year
-        self.team = team
-        self.week_num = week_num
-        self.result = result
-        self.wins = wins
-        self.place = place
-        self.opponent = opponent
-        self.yards_for = yards_for
-        self.yards_against = yards_against
-        self.coach = coach
 
     
-
-Base.metadata.create_all(engine)
-
-
-    
-###########################Check to see if data is already in
-def updload_to_nfl_histroy(data):
-
-
-    mysql_login_cred = ('pharm_login')
-    engine = create_engine(mysql_login_cred, echo=False)
-
-    Base = declarative_base()
-    Session = scoped_session(sessionmaker(bind=engine))
-    Session.configure(bind=engine)
-    session = Session()
-
-    true, false = literal(True), literal(False)
-
-
-    for x in data:
-        #ret = Session.query(exists().where(quickview_sku.sku==x[1])).scalar()
-        if ret = 5: #Make this true to show already in DB
-            print ('{} already in\n').format(x[1])
-            pass
-        else: 
-            addWeek = nfl_history(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10])
-            session.add(addWeek)
-            session.commit()
-            print ('Added year {}\n').format(x[0])
-
+################################3
 
 if __name__ == "__main__":
 	get_all_info(team)
